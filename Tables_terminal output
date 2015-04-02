@@ -1,0 +1,273 @@
+Last login: Wed Apr  1 14:48:22 on ttys002
+Cristinas-MacBook-Pro:~ cristinareames$ psql
+psql (9.4.1)
+Type "help" for help.
+
+        ^
+apartmentlab=# CREATE TABLE owners(
+owner_id SERIAL PRIMARY KEY,
+name TEXT,
+age INTEGER
+);
+CREATE TABLE
+        ^
+apartmentlab=# select * from owners;
+ owner_id | name | age 
+----------+------+-----
+(0 rows)
+
+                      ^
+apartmentlab=# CREATE TABLE properties(
+apartmentlab(# property_id serial primary key,
+apartmentlab(# name text,
+apartmentlab(# num_of_units integer,
+apartmentlab(# owner_id foriegn key not null
+apartmentlab(# );
+ERROR:  syntax error at or near "key"
+LINE 5: owner_id foriegn key not null
+                         ^
+
+apartmentlab=# CREATE TABLE properties(
+property_id serial primary key,
+name text,
+num_of_units integer,
+owner_id integer not null
+);
+CREATE TABLE
+                        ^
+            ^
+apartmentlab=# CREATE TABLE properties(
+property_id SERIAL PRIMARY KEY,
+name TEXT,
+units INTEGER,
+owner_id INTEGER references owners(owner_id)
+apartmentlab(# );
+ERROR:  relation "properties" already exists
+apartmentlab=# select*from properties;
+ property_id | name | num_of_units | owner_id 
+-------------+------+--------------+----------
+(0 rows)
+
+apartmentlab=# ALTER TABLE properties ALTER COLUMN owner_id SET NOT NULL;
+ALTER TABLE
+apartmentlab=# select *from properties;
+ property_id | name | num_of_units | owner_id 
+-------------+------+--------------+----------
+(0 rows)
+
+apartmentlab=# ALTER TABLE properties RENAME COLUMN name TO property_name;
+ALTER TABLE
+apartmentlab=# select * from properties;
+ property_id | property_name | num_of_units | owner_id 
+-------------+---------------+--------------+----------
+(0 rows)
+
+apartmentlab=# SELECT owner_id FROM properties WHERE owner_id BETWEEN 1 AND 3;
+ owner_id 
+----------
+(0 rows)
+
+apartmentlab=# \l
+                                             List of databases
+      Name      |     Owner      | Encoding |   Collate   |    Ctype    |         Access privileges         
+----------------+----------------+----------+-------------+-------------+-----------------------------------
+ apartmentlab   | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ cristinareames | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ fishtank       | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ joins_example  | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ postgres       | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ school         | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+ template0      | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/cristinareames                +
+                |                |          |             |             | cristinareames=CTc/cristinareames
+ template1      | cristinareames | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/cristinareames                +
+                |                |          |             |             | cristinareames=CTc/cristinareames
+(8 rows)
+
+apartmentlab=# \d
+                        List of relations
+ Schema |            Name            |   Type   |     Owner      
+--------+----------------------------+----------+----------------
+ public | owners                     | table    | cristinareames
+ public | owners_owner_id_seq        | sequence | cristinareames
+ public | properties                 | table    | cristinareames
+ public | properties_property_id_seq | sequence | cristinareames
+(4 rows)
+
+apartmentlab=# \du
+                                List of roles
+   Role name    |                   Attributes                   | Member of 
+----------------+------------------------------------------------+-----------
+ cristinareames | Superuser, Create role, Create DB, Replication | {}
+
+apartmentlab=# SELECT*FROM owners;
+ owner_id | name | age 
+----------+------+-----
+(0 rows)
+
+apartmentlab=# SELECT names FROM owners;
+ERROR:  column "names" does not exist
+LINE 1: SELECT names FROM owners;
+               ^
+apartmentlab=# SELECT name FROM owners;
+ name 
+------
+(0 rows)
+
+apartmentlab=# SELECT age FROM owners ORDER BY ASC;
+ERROR:  syntax error at or near "ASC"
+LINE 1: SELECT age FROM owners ORDER BY ASC;
+                                        ^
+apartmentlab=# SELECT *FROM owners ORDER BY AGE ASC; 
+ owner_id | name | age 
+----------+------+-----
+(0 rows)
+
+apartmentlab=# SELECT name FROM owners WHERE name='donald';
+ name 
+------
+(0 rows)
+
+apartmentlab=# SELECT*FROM owners WHERE age>30;
+ owner_id | name | age 
+----------+------+-----
+(0 rows)
+
+apartmentlab=# SELECT*FROM owners WHERE name LIKE 'E%';
+ owner_id | name | age 
+----------+------+-----
+(0 rows)
+
+apartmentlab=# INSERT INTO owners(name,age)
+apartmentlab-# values ('John', 32);
+INSERT 0 1
+apartmentlab=# INSERT INTO owners(name,age)
+apartmentlab-# values('Jane',43);
+INSERT 0 1
+apartmentlab=# UPDATE owners SET age=30 WHERE name='Jane';
+UPDATE 1
+apartmentlab=# SELECT*FROM owners
+apartmentlab-# SELECT * FROM owners;
+ERROR:  syntax error at or near "SELECT"
+LINE 2: SELECT * FROM owners;
+        ^
+apartmentlab=# SELECT*FROM owners;
+ owner_id | name | age 
+----------+------+-----
+        1 | John |  32
+        2 | Jane |  30
+(2 rows)
+
+apartmentlab=# UPDATE owners SET name='Janet' WHERE name='Jane';
+UPDATE 1
+apartmentlab=# INSERT INTO properties (property_name, num_of_units)
+apartmentlab-# values('Archstone', 20);
+ERROR:  null value in column "owner_id" violates not-null constraint
+DETAIL:  Failing row contains (1, Archstone, 20, null).
+apartmentlab=# DELETE*FROM owners WHERE name='Jane';
+ERROR:  syntax error at or near "*"
+LINE 1: DELETE*FROM owners WHERE name='Jane';
+              ^
+apartmentlab=# DELETE FROM owners WHERE name='Jane';
+DELETE 0
+apartmentlab=# SELECT *FROM properties WHERE name<>'Archstone' AND property_id<>3,5 ORDER BY name;
+ERROR:  syntax error at or near ","
+LINE 1: ...perties WHERE name<>'Archstone' AND property_id<>3,5 ORDER B...
+                                                             ^
+apartmentlab=# SELECT *FROM properties WHERE name<>'Archstone' AND property_id<>3 OR 5 ORDER BY name;
+ERROR:  column "name" does not exist
+LINE 1: SELECT *FROM properties WHERE name<>'Archstone' AND property...
+                                      ^
+apartmentlab=# SELECT *FROM properties WHERE property_name<>'Archstone' AND property_id<>3 OR 5 ORDER BY name;
+ERROR:  argument of OR must be type boolean, not type integer
+LINE 1: ... property_name<>'Archstone' AND property_id<>3 OR 5 ORDER BY...
+                                                             ^
+apartmentlab=# SELECT *FROM properties WHERE property_name<>'Archstone' AND (property_id<>3 OR property_id<>5) ORDER BY name;
+ERROR:  column "name" does not exist
+LINE 1: ...stone' AND (property_id<>3 OR property_id<>5) ORDER BY name;
+                                                                  ^
+apartmentlab=# SELECT *FROM properties WHERE property_name<>'Archstone' AND (property_id<>3 OR property_id<>5) ORDER BY property_name;
+ property_id | property_name | num_of_units | owner_id 
+-------------+---------------+--------------+----------
+(0 rows)
+
+apartmentlab=# SELECT COUNT(*) FROM properties;
+ count 
+-------
+     0
+(1 row)
+
+apartmentlab=# SELECT MAX (age) FROM owners;
+ max 
+-----
+  32
+(1 row)
+
+apartmentlab=# SELECT TOP 3*FROM owners;
+ERROR:  syntax error at or near "3"
+LINE 1: SELECT TOP 3*FROM owners;
+                   ^
+apartmentlab=# SELECT TOP 3 * FROM owners;
+ERROR:  syntax error at or near "3"
+LINE 1: SELECT TOP 3 * FROM owners;
+                   ^
+apartmentlab=# SELECT TOP 3 FROM owners;
+ERROR:  syntax error at or near "3"
+LINE 1: SELECT TOP 3 FROM owners;
+                   ^
+apartmentlab=# SELECT * FROM owners LIMIT 3;
+ owner_id | name  | age 
+----------+-------+-----
+        1 | John  |  32
+        2 | Janet |  30
+(2 rows)
+
+apartmentlab=# ALTER TABLE properties ADD FOREIGN KEY (owner_id) references owners (owner_id);
+ALTER TABLE
+apartmentlab=# SELECT count(*) FROM properties WHERE (1<owner_id<3);
+ERROR:  syntax error at or near "<"
+LINE 1: SELECT count(*) FROM properties WHERE (1<owner_id<3);
+                                                         ^
+apartmentlab=# SELECT count(*) FROM properties WHERE (owner_id=<3 AND owner_id=>1);
+ERROR:  operator does not exist: integer =< integer
+LINE 1: SELECT count(*) FROM properties WHERE (owner_id=<3 AND owner...
+                                                       ^
+HINT:  No operator matches the given name and argument type(s). You might need to add explicit type casts.
+apartmentlab=# SELECT count(*) FROM properties WHERE (owner_id<3 AND owner_id>1);
+ count 
+-------
+     0
+(1 row)
+
+apartmentlab=# CREATE TABLE owners_properties(
+apartmentlab(# owner_id integer,
+apartmentlab(# properties_id integer);
+CREATE TABLE
+apartmentlab=# SELECT*FROM owners_properties;
+ owner_id | properties_id 
+----------+---------------
+(0 rows)
+
+apartmentlab=# SELECT*FROM owners
+apartmentlab-# INNER JOIN properties ON owner_id;
+ERROR:  column reference "owner_id" is ambiguous
+LINE 2: INNER JOIN properties ON owner_id;
+                                 ^
+apartmentlab=# SELECT name,age,owner_id FROM owners
+apartmentlab-# INNER JOIN properties ON owner_id;
+ERROR:  column reference "owner_id" is ambiguous
+LINE 2: INNER JOIN properties ON owner_id;
+                                 ^
+apartmentlab=# SELECT * FROM owners
+INNER JOIN properties ON owner_id=owner_id;
+ERROR:  column reference "owner_id" is ambiguous
+LINE 2: INNER JOIN properties ON owner_id=owner_id;
+                                 ^
+apartmentlab=# SELECT * FROM owners
+INNER JOIN properties ON owners.owner_id=properties.owner_id;
+ owner_id | name | age | property_id | property_name | num_of_units | owner_id 
+----------+------+-----+-------------+---------------+--------------+----------
+(0 rows)
+
+apartmentlab=# /q
+apartmentlab-# \q
+Cristinas-MacBook-Pro:~ cristinareames$ 
